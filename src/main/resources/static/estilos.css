@@ -1,0 +1,196 @@
+/* DEFINICIÓN DE IDENTIDAD VITALTACC */
+:root {
+    --celeste-vital: #00adef;
+    /* Celeste predominante Sin TACC */
+    --naranja-vital: #f7941e;
+    --blanco: #ffffff;
+    --gris-claro: #f8f9fa;
+    --texto-oscuro: #333;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: var(--gris-claro);
+    color: var(--texto-oscuro);
+}
+
+/* Encabezado */
+header {
+    background-color: var(--blanco);
+    padding: 10px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-top: 5px solid var(--celeste-vital);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-text {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--celeste-vital);
+    text-transform: uppercase;
+}
+
+.logo-text span {
+    color: var(--naranja-vital);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* Panel de Administración */
+.admin-panel {
+    background: var(--blanco);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 40px;
+    border-left: 5px solid var(--naranja-vital);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+input {
+    padding: 12px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: var(--celeste-vital);
+}
+
+.btn-guardar {
+    background-color: var(--celeste-vital);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.btn-guardar:hover {
+    background-color: #0089bd;
+}
+
+/* Grilla de Productos */
+.productos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background: var(--blanco);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    transition: 0.4s;
+    border: 1px solid #eee;
+}
+
+.card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-8px);
+}
+
+.card h3 {
+    margin: 15px 0 5px 0;
+    font-size: 1.3rem;
+}
+
+.card p {
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    height: 40px;
+}
+
+.price {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--celeste-vital);
+    margin-bottom: 20px;
+}
+
+.btn-delete {
+    background-color: #fff1f1;
+    color: #ff4d4d;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.btn-delete:hover {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+/* --- AJUSTES PARA CELULARES (RESPONSIVE) --- */
+@media (max-width: 600px) {
+    header {
+        flex-direction: column;
+        padding: 15px 0;
+    }
+
+    .logo-text {
+        font-size: 22px;
+        margin-bottom: 5px;
+    }
+
+    .container {
+        margin-top: 15px;
+    }
+
+    .admin-panel {
+        padding: 15px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        /* Todo en una columna */
+    }
+
+    .btn-guardar {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .productos-grid {
+        grid-template-columns: 1fr;
+        /* Una tarjeta por fila */
+        gap: 20px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+}

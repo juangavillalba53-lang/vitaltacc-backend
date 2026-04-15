@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitalTacc - Tienda Online</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-text">VITAL<span>TACC</span></div>
+        </div>
+        <div style="color: #888; font-weight: 500;">Tienda de Alimentos</div>
+    </header>
+
+    <div class="container">
+        <div class="admin-panel">
+            <h2 style="margin: 0 0 20px 0;">Panel de Administración</h2>
+            <div class="form-grid">
+                <input type="text" id="nombre" placeholder="Nombre del Producto">
+                <input type="text" id="desc" placeholder="Descripción corta">
+                <input type="number" id="precio" placeholder="Precio ($)">
+                <input type="number" id="stock" placeholder="Stock disponible">
+                <button class="btn-guardar" onclick="agregarProducto()">+ AGREGAR A GÓNDOLA</button>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 30px;">Nuestros Productos</h2>
+        <div id="gridProductos" class="productos-grid">
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/productos';
+
+        async function cargarProductos() {
+            try {
+                const res = await fetch(API_URL);
+                const productos = await res.json();
+                const grid = document.getElementById('gridProductos');
+                grid.innerHTML = '';
+
+                productos.forEach(p => {
+                    grid.innerHTML += `
+                        <div class="card">
+                            <h3>${p.nombre}</h3>
+                            <p>${p.descripcion}</p>
+                            <div class="price">$${p.precio}</div>
+                            <div style="margin-bottom: 15px; color: #555;">Disponibles: <b>${p.stock}</b></div>
+                            <button class="btn-delete" onclick="borrar(${p.id})">Eliminar</button>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Error al cargar productos:", error);
+            }
+        }
+
+        async function agregarProducto() {
+            const nuevo = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('desc').value,
+                precio: document.getElementById('precio').value,
+                stock: document.getElementById('stock').value
+            };
+
+            if (!nuevo.nombre || !nuevo.precio) {
+                alert("Por favor, completá al menos el nombre y el precio.");
+                return;
+            }
+
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuevo)
+            });
+
+            document.querySelectorAll('input').forEach(i => i.value = '');
+            cargarProductos();
+        }
+
+        async function borrar(id) {
+            if (confirm('¿Desea quitar este producto de la góndola?')) {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                cargarProductos();
+            }
+        }
+
+        // Carga inicial
+        cargarProductos();
+    </script>
+</body>
+
+</html>
