@@ -6,15 +6,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VitalTacc - Tienda Online</title>
     <link rel="stylesheet" href="estilos.css">
+    <style>
+        /* Agregué un poco de estilo extra para que el carrito se vea pro */
+        .carrito-container {
+            background: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-carrito {
+            background: #e67e22;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+
+        .btn-comprar {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .btn-comprar:hover {
+            background-color: #219150;
+        }
+    </style>
 </head>
 
 <body>
 
-    <header>
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 40px;">
         <div class="logo-container">
             <div class="logo-text">VITAL<span>TACC</span></div>
+            <div style="color: #888; font-weight: 500; font-size: 0.8rem;">Tienda de Alimentos</div>
         </div>
-        <div style="color: #888; font-weight: 500;">Tienda de Alimentos</div>
+
+        <div class="carrito-container">
+            <span>🛒 Mi Carrito</span>
+            <span id="contador-carrito" class="badge-carrito">0</span>
+        </div>
     </header>
 
     <div class="container">
@@ -37,6 +78,9 @@
     <script>
         const API_URL = 'http://localhost:8080/productos';
 
+        // PASO 2: Variable global para el carrito
+        let carrito = [];
+
         async function cargarProductos() {
             try {
                 const res = await fetch(API_URL);
@@ -51,13 +95,33 @@
                             <p>${p.descripcion}</p>
                             <div class="price">$${p.precio}</div>
                             <div style="margin-bottom: 15px; color: #555;">Disponibles: <b>${p.stock}</b></div>
-                            <button class="btn-delete" onclick="borrar(${p.id})">Eliminar</button>
+                            
+                            <button class="btn-comprar" onclick="comprar('${p.nombre}', ${p.precio})">
+                                🛒 Agregar al Carrito
+                            </button>
+                            
+                            <button class="btn-delete" style="margin-top: 10px; background: none; color: #e74c3c; border: 1px solid #e74c3c;" onclick="borrar(${p.id})">
+                                Eliminar de Stock
+                            </button>
                         </div>
                     `;
                 });
             } catch (error) {
                 console.error("Error al cargar productos:", error);
             }
+        }
+
+        // PASO 4: Función para la lógica del carrito
+        function comprar(nombre, precio) {
+            const item = { nombre, precio };
+            carrito.push(item);
+
+            // Actualizamos el numerito visual
+            document.getElementById('contador-carrito').innerText = carrito.length;
+
+            console.log("Carrito actual:", carrito);
+            // Opcional: una pequeña notificación
+            // alert("Agregaste " + nombre + " al carrito");
         }
 
         async function agregarProducto() {
