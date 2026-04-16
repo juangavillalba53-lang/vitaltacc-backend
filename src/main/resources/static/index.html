@@ -6,6 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VitalTacc - Tienda Online</title>
     <link rel="stylesheet" href="estilos.css">
+    <style>
+        /* Estilos extras para los nuevos botones de filtro */
+        .filtros-container {
+            margin-bottom: 35px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .btn-filtro {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .btn-filtro:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-filtro.active {
+            background: var(--celeste-vital);
+            color: white;
+            border-color: var(--celeste-vital);
+        }
+    </style>
 </head>
 
 <body>
@@ -30,11 +60,36 @@
                 <input type="text" id="desc" placeholder="Descripción corta">
                 <input type="number" id="precio" placeholder="Precio ($)">
                 <input type="number" id="stock" placeholder="Stock disponible">
+
+                <select id="categoria"
+                    style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">
+                    <option value="General">Categoría: General</option>
+                    <option value="Harinas">Harinas / Premix</option>
+                    <option value="Snacks">Snacks / Galletitas</option>
+                    <option value="Bebidas">Bebidas</option>
+                    <option value="Reposteria">Repostería</option>
+                </select>
+
                 <button class="btn-guardar" onclick="agregarProducto()">+ AGREGAR A GÓNDOLA</button>
             </div>
         </div>
 
-        <h2 style="margin-bottom: 30px;">Nuestros Productos</h2>
+        <div class="filtros-container">
+            <h2 style="margin-bottom: 15px;">Nuestros Productos</h2>
+
+            <input type="text" id="inputBusqueda" placeholder="Buscar en VitalTacc (ej: Fideos, Harina...)"
+                style="width: 100%; padding: 15px; border-radius: 50px; border: 2px solid #eee; margin-bottom: 20px; outline: none; font-size: 16px; box-sizing: border-box;"
+                onkeyup="filtrarPorNombre()">
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-filtro active" onclick="filtrarPorCategoria('Todos', this)">Todos</button>
+                <button class="btn-filtro" onclick="filtrarPorCategoria('Harinas', this)">Harinas</button>
+                <button class="btn-filtro" onclick="filtrarPorCategoria('Snacks', this)">Snacks</button>
+                <button class="btn-filtro" onclick="filtrarPorCategoria('Bebidas', this)">Bebidas</button>
+                <button class="btn-filtro" onclick="filtrarPorCategoria('Reposteria', this)">Repostería</button>
+            </div>
+        </div>
+
         <div id="gridProductos" class="productos-grid"></div>
     </div>
 
@@ -44,6 +99,7 @@
 
             <div class="modal-header-ml">
                 <div class="product-img-circle">
+                    <div id="modal-icono-resumen" style="font-size: 30px;">📦</div>
                     <div class="check-icon">✓</div>
                 </div>
                 <div>
@@ -79,12 +135,13 @@
 
                 productosCache.forEach(p => {
                     grid.innerHTML += `
-                        <div class="card">
+                        <div class="card" data-categoria="${p.categoria || 'General'}">
+                            <div style="font-size: 3.5rem; margin-bottom: 15px;">${obtenerIcono(p.categoria)}</div>
                             <h3>${p.nombre}</h3>
                             <p>${p.descripcion}</p>
                             <div class="price">$${p.precio}</div>
                             <div style="margin-bottom: 15px; color: #555;">Disponibles: <b>${p.stock}</b></div>
-                            <button class="btn-comprar" onclick="comprar('${p.nombre}', ${p.precio})">
+                            <button class="btn-comprar" onclick="comprar('${p.nombre}', ${p.precio}, '${p.categoria}')">
                                 🛒 Agregar al Carrito
                             </button>
                             <button class="btn-delete" onclick="borrar(${p.id})">Eliminar de Stock</button>
@@ -96,32 +153,35 @@
             }
         }
 
-        function comprar(nombre, precio) {
-            const item = { nombre, precio };
-            carrito.push(item);
+        function obtenerIcono(cat) {
+            if (cat === 'Harinas') return '🌾';
+            if (cat === 'Snacks') return '🍪';
+            if (cat === 'Bebidas') return '🥤';
+            if (cat === 'Reposteria') return '🍰';
+            return '📦';
+        }
 
-            const contador = document.getElementById('contador-carrito');
-            contador.innerText = carrito.length;
-            contador.classList.add('animar-carrito');
-            setTimeout(() => contador.classList.remove('animar-carrito'), 400);
+        function comprar(nombre, precio, categoria) {
+            carrito.push({ nombre, precio });
+            document.getElementById('contador-carrito').innerText = carrito.length;
 
+            document.getElementById('modal-icono-resumen').innerText = obtenerIcono(categoria);
             mostrarModalConfirmacion(nombre);
         }
 
         function mostrarModalConfirmacion(nombreAgregado) {
-            // Actualizar el título con el nombre del producto
+            document.getElementById('modal-titulo-producto').innerText = `Agregaste ${nombreAgregado}`;
             const sugerenciasContainer = document.getElementById('sugerencias-container');
             sugerenciasContainer.innerHTML = '';
 
-            const otrosProductos = productosCache.filter(p => p.nombre !== nombreAgregado);
-            const aleatorios = otrosProductos.sort(() => 0.5 - Math.random()).slice(0, 2);
+            const otros = productosCache.filter(p => p.nombre !== nombreAgregado).sort(() => 0.5 - Math.random()).slice(0, 2);
 
-            aleatorios.forEach(s => {
+            otros.forEach(s => {
                 sugerenciasContainer.innerHTML += `
                     <div class="sug-card">
-                        <div style="font-size: 1.5rem; margin-bottom: 5px;">📦</div>
+                        <div style="font-size: 1.5rem; margin-bottom: 5px;">${obtenerIcono(s.categoria)}</div>
                         <div style="font-weight: 600; font-size: 12px; height: 30px; overflow: hidden;">${s.nombre}</div>
-                        <div style="color: #333; font-weight: bold; margin-top: 5px;">$${s.precio}</div>
+                        <div style="color: #3483fa; font-weight: bold; margin-top: 5px;">$${s.precio}</div>
                     </div>
                 `;
             });
@@ -129,12 +189,34 @@
             document.getElementById('modalConfirmacion').style.display = 'flex';
         }
 
-        function cerrarModal() {
-            document.getElementById('modalConfirmacion').style.display = 'none';
+        // BUSCADOR CORREGIDO
+        function filtrarPorNombre() {
+            const texto = document.getElementById('inputBusqueda').value.toLowerCase();
+            const productos = document.querySelectorAll('.card');
+            productos.forEach(card => {
+                const nombre = card.querySelector('h3').innerText.toLowerCase();
+                // Usamos "" para que respete el estilo original del CSS
+                card.style.display = nombre.includes(texto) ? "" : "none";
+            });
         }
 
+        // FILTRO POR BOTONES CORREGIDO
+        function filtrarPorCategoria(cat, btn) {
+            document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const productos = document.querySelectorAll('.card');
+            productos.forEach(card => {
+                const categoriaCard = card.getAttribute('data-categoria');
+                // Usamos "" para que respete el estilo original del CSS
+                card.style.display = (cat === 'Todos' || categoriaCard === cat) ? "" : "none";
+            });
+        }
+
+        function cerrarModal() { document.getElementById('modalConfirmacion').style.display = 'none'; }
+
         function irAlCarrito() {
-            alert("Ir al carrito - Items: " + carrito.length);
+            alert("Redirigiendo al checkout - Items: " + carrito.length);
             cerrarModal();
         }
 
@@ -143,12 +225,11 @@
                 nombre: document.getElementById('nombre').value,
                 descripcion: document.getElementById('desc').value,
                 precio: document.getElementById('precio').value,
-                stock: document.getElementById('stock').value
+                stock: document.getElementById('stock').value,
+                categoria: document.getElementById('categoria').value
             };
-            if (!nuevo.nombre || !nuevo.precio) {
-                alert("Completa nombre y precio.");
-                return;
-            }
+            if (!nuevo.nombre || !nuevo.precio) return alert("Completa nombre y precio.");
+
             await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
