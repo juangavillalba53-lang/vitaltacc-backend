@@ -1,196 +1,236 @@
-/* DEFINICIÓN DE IDENTIDAD VITALTACC */
+/* VARIABLES VITALTACC */
 :root {
-    --celeste-vital: #00adef;
-    /* Celeste predominante Sin TACC */
-    --naranja-vital: #f7941e;
+    --celeste: #00adef;
+    --naranja: #f7941e;
     --blanco: #ffffff;
-    --gris-claro: #f8f9fa;
-    --texto-oscuro: #333;
+    --gris: #f8f9fa;
+    --azul-ml: #3483fa;
+    --verde-ml: #00a650;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
-    background-color: var(--gris-claro);
-    color: var(--texto-oscuro);
+    background-color: var(--gris);
+    overflow-x: hidden;
 }
 
-/* Encabezado */
+/* HEADER */
 header {
-    background-color: var(--blanco);
+    background: var(--blanco);
     padding: 10px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-top: 5px solid var(--celeste-vital);
+    border-top: 5px solid var(--celeste);
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
-.logo-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 .logo-text {
     font-size: 26px;
     font-weight: 900;
-    color: var(--celeste-vital);
+    color: var(--celeste);
     text-transform: uppercase;
 }
 
 .logo-text span {
-    color: var(--naranja-vital);
+    color: var(--naranja);
 }
 
+.carrito-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    padding: 8px 15px;
+    border-radius: 50px;
+    border: 1px solid #ddd;
+}
+
+.badge-carrito {
+    background: var(--naranja);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+/* GRILLA DE PRODUCTOS */
 .container {
     max-width: 1200px;
-    margin: 30px auto;
+    margin: 20px auto;
     padding: 0 20px;
 }
 
-/* Panel de Administración */
-.admin-panel {
-    background: var(--blanco);
-    padding: 25px;
-    border-radius: 15px;
-    margin-bottom: 40px;
-    border-left: 5px solid var(--naranja-vital);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-}
-
-input {
-    padding: 12px;
-    border: 2px solid #eee;
-    border-radius: 8px;
-    outline: none;
-    transition: 0.3s;
-}
-
-input:focus {
-    border-color: var(--celeste-vital);
-}
-
-.btn-guardar {
-    background-color: var(--celeste-vital);
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    transition: 0.3s;
-}
-
-.btn-guardar:hover {
-    background-color: #0089bd;
-}
-
-/* Grilla de Productos */
 .productos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
 }
 
 .card {
-    background: var(--blanco);
-    border-radius: 20px;
-    padding: 25px;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
     text-align: center;
-    transition: 0.4s;
     border: 1px solid #eee;
-}
-
-.card:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    transform: translateY(-8px);
-}
-
-.card h3 {
-    margin: 15px 0 5px 0;
-    font-size: 1.3rem;
-}
-
-.card p {
-    color: #888;
-    font-size: 0.95rem;
-    margin-bottom: 20px;
-    height: 40px;
-}
-
-.price {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--celeste-vital);
-    margin-bottom: 20px;
-}
-
-.btn-delete {
-    background-color: #fff1f1;
-    color: #ff4d4d;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
     transition: 0.3s;
 }
 
-.btn-delete:hover {
-    background-color: #ff4d4d;
-    color: white;
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* --- AJUSTES PARA CELULARES (RESPONSIVE) --- */
-@media (max-width: 600px) {
-    header {
-        flex-direction: column;
-        padding: 15px 0;
+.price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--celeste);
+    margin: 10px 0;
+}
+
+.btn-comprar {
+    background: var(--naranja);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    width: 100%;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* =========================================
+   EL PANEL LATERAL (ESTILO MERCADO LIBRE)
+   ========================================= */
+.modal-ml {
+    display: none;
+    /* Se activa con JS */
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    justify-content: flex-end;
+    /* Lo pega a la derecha */
+}
+
+.modal-content-ml {
+    background: white;
+    width: 100%;
+    max-width: 380px;
+    height: 100vh;
+    box-sizing: border-box;
+    padding: 40px 25px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
+    animation: aparecerDerecha 0.3s ease-out;
+}
+
+@keyframes aparecerDerecha {
+    from {
+        transform: translateX(100%);
     }
 
-    .logo-text {
-        font-size: 22px;
-        margin-bottom: 5px;
+    to {
+        transform: translateX(0);
     }
+}
 
-    .container {
-        margin-top: 15px;
-    }
+.modal-header-ml {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
 
-    .admin-panel {
-        padding: 15px;
-    }
+.product-img-circle {
+    width: 60px;
+    height: 60px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    font-size: 30px;
+}
 
-    .form-grid {
-        grid-template-columns: 1fr;
-        /* Todo en una columna */
-    }
+.check-icon {
+    background: var(--verde-ml);
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border: 2px solid white;
+}
 
-    .btn-guardar {
-        width: 100%;
-        padding: 15px;
-    }
+.modal-sugerencias {
+    flex-grow: 1;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
 
-    .productos-grid {
-        grid-template-columns: 1fr;
-        /* Una tarjeta por fila */
-        gap: 20px;
-    }
+.sugerencias-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
 
-    .card {
-        padding: 20px;
-    }
+.sug-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+}
+
+/* BOTONES AZULES ML */
+.modal-actions-ml {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+}
+
+.btn-azul-relleno {
+    background: var(--azul-ml);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-azul-suave {
+    background: rgba(65, 137, 230, 0.15);
+    color: var(--azul-ml);
+    border: none;
+    padding: 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 25px;
+    cursor: pointer;
+    color: #999;
 }

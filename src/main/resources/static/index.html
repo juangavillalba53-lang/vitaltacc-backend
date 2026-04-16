@@ -6,47 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VitalTacc - Tienda Online</title>
     <link rel="stylesheet" href="estilos.css">
-    <style>
-        /* Agregué un poco de estilo extra para que el carrito se vea pro */
-        .carrito-container {
-            background: #fff;
-            padding: 10px 20px;
-            border-radius: 50px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .badge-carrito {
-            background: #e67e22;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 50%;
-            font-weight: bold;
-        }
-
-        .btn-comprar {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .btn-comprar:hover {
-            background-color: #219150;
-        }
-    </style>
 </head>
 
 <body>
 
-    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 40px;">
+    <header>
         <div class="logo-container">
             <div class="logo-text">VITAL<span>TACC</span></div>
             <div style="color: #888; font-weight: 500; font-size: 0.8rem;">Tienda de Alimentos</div>
@@ -71,38 +35,59 @@
         </div>
 
         <h2 style="margin-bottom: 30px;">Nuestros Productos</h2>
-        <div id="gridProductos" class="productos-grid">
+        <div id="gridProductos" class="productos-grid"></div>
+    </div>
+
+    <div id="modalConfirmacion" class="modal-ml">
+        <div class="modal-content-ml">
+            <span class="close-modal" onclick="cerrarModal()">&times;</span>
+
+            <div class="modal-header-ml">
+                <div class="product-img-circle">
+                    <div class="check-icon">✓</div>
+                </div>
+                <div>
+                    <h3 id="modal-titulo-producto">Agregaste a tu carrito</h3>
+                    <p id="modal-detalle-producto" style="color: #666; font-size: 14px; margin: 5px 0 0 0;">1 unidad</p>
+                </div>
+            </div>
+
+            <div class="modal-sugerencias">
+                <p style="font-weight: bold; margin-bottom: 15px; color: #333; font-size: 14px;">También te puede
+                    interesar...</p>
+                <div class="sugerencias-grid" id="sugerencias-container"></div>
+            </div>
+
+            <div class="modal-actions-ml">
+                <button class="btn-azul-relleno" onclick="cerrarModal()">Ver más productos</button>
+                <button class="btn-azul-suave" onclick="irAlCarrito()">Ir al carrito</button>
+            </div>
         </div>
     </div>
 
     <script>
         const API_URL = 'http://localhost:8080/productos';
-
-        // PASO 2: Variable global para el carrito
         let carrito = [];
+        let productosCache = [];
 
         async function cargarProductos() {
             try {
                 const res = await fetch(API_URL);
-                const productos = await res.json();
+                productosCache = await res.json();
                 const grid = document.getElementById('gridProductos');
                 grid.innerHTML = '';
 
-                productos.forEach(p => {
+                productosCache.forEach(p => {
                     grid.innerHTML += `
                         <div class="card">
                             <h3>${p.nombre}</h3>
                             <p>${p.descripcion}</p>
                             <div class="price">$${p.precio}</div>
                             <div style="margin-bottom: 15px; color: #555;">Disponibles: <b>${p.stock}</b></div>
-                            
                             <button class="btn-comprar" onclick="comprar('${p.nombre}', ${p.precio})">
                                 🛒 Agregar al Carrito
                             </button>
-                            
-                            <button class="btn-delete" style="margin-top: 10px; background: none; color: #e74c3c; border: 1px solid #e74c3c;" onclick="borrar(${p.id})">
-                                Eliminar de Stock
-                            </button>
+                            <button class="btn-delete" onclick="borrar(${p.id})">Eliminar de Stock</button>
                         </div>
                     `;
                 });
@@ -111,17 +96,46 @@
             }
         }
 
-        // PASO 4: Función para la lógica del carrito
         function comprar(nombre, precio) {
             const item = { nombre, precio };
             carrito.push(item);
 
-            // Actualizamos el numerito visual
-            document.getElementById('contador-carrito').innerText = carrito.length;
+            const contador = document.getElementById('contador-carrito');
+            contador.innerText = carrito.length;
+            contador.classList.add('animar-carrito');
+            setTimeout(() => contador.classList.remove('animar-carrito'), 400);
 
-            console.log("Carrito actual:", carrito);
-            // Opcional: una pequeña notificación
-            // alert("Agregaste " + nombre + " al carrito");
+            mostrarModalConfirmacion(nombre);
+        }
+
+        function mostrarModalConfirmacion(nombreAgregado) {
+            // Actualizar el título con el nombre del producto
+            const sugerenciasContainer = document.getElementById('sugerencias-container');
+            sugerenciasContainer.innerHTML = '';
+
+            const otrosProductos = productosCache.filter(p => p.nombre !== nombreAgregado);
+            const aleatorios = otrosProductos.sort(() => 0.5 - Math.random()).slice(0, 2);
+
+            aleatorios.forEach(s => {
+                sugerenciasContainer.innerHTML += `
+                    <div class="sug-card">
+                        <div style="font-size: 1.5rem; margin-bottom: 5px;">📦</div>
+                        <div style="font-weight: 600; font-size: 12px; height: 30px; overflow: hidden;">${s.nombre}</div>
+                        <div style="color: #333; font-weight: bold; margin-top: 5px;">$${s.precio}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('modalConfirmacion').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalConfirmacion').style.display = 'none';
+        }
+
+        function irAlCarrito() {
+            alert("Ir al carrito - Items: " + carrito.length);
+            cerrarModal();
         }
 
         async function agregarProducto() {
@@ -131,30 +145,26 @@
                 precio: document.getElementById('precio').value,
                 stock: document.getElementById('stock').value
             };
-
             if (!nuevo.nombre || !nuevo.precio) {
-                alert("Por favor, completá al menos el nombre y el precio.");
+                alert("Completa nombre y precio.");
                 return;
             }
-
             await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(nuevo)
             });
-
             document.querySelectorAll('input').forEach(i => i.value = '');
             cargarProductos();
         }
 
         async function borrar(id) {
-            if (confirm('¿Desea quitar este producto de la góndola?')) {
+            if (confirm('¿Desea quitar este producto?')) {
                 await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
                 cargarProductos();
             }
         }
 
-        // Carga inicial
         cargarProductos();
     </script>
 </body>
