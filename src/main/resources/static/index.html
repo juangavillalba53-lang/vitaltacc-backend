@@ -7,13 +7,12 @@
     <title>VitalTacc - Tienda Online</title>
     <link rel="stylesheet" href="estilos.css">
     <style>
-        /* Estilos extras para los nuevos botones de filtro */
         .filtros-container {
             margin-bottom: 35px;
             background: white;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
 
         .btn-filtro {
@@ -22,18 +21,21 @@
             border: 1px solid #ddd;
             background: white;
             cursor: pointer;
-            font-weight: 500;
             transition: 0.3s;
-        }
-
-        .btn-filtro:hover {
-            background: #f0f0f0;
+            font-weight: 500;
         }
 
         .btn-filtro.active {
-            background: var(--celeste-vital);
+            background: #00a1b4;
+            /* Celeste VitalTacc */
             color: white;
-            border-color: var(--celeste-vital);
+            border-color: #00a1b4;
+        }
+
+        .sin-stock {
+            filter: grayscale(1);
+            opacity: 0.7;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -43,41 +45,18 @@
     <header>
         <div class="logo-container">
             <div class="logo-text">VITAL<span>TACC</span></div>
-            <div style="color: #888; font-weight: 500; font-size: 0.8rem;">Tienda de Alimentos</div>
+            <div style="color: #888; font-weight: 500; font-size: 0.8rem;">Tienda de Alimentos Sin TACC</div>
         </div>
-
-        <div class="carrito-container">
+        <div class="carrito-container" style="cursor: pointer;" onclick="irAlCarrito()">
             <span>🛒 Mi Carrito</span>
             <span id="contador-carrito" class="badge-carrito">0</span>
         </div>
     </header>
 
     <div class="container">
-        <div class="admin-panel">
-            <h2 style="margin: 0 0 20px 0;">Panel de Administración</h2>
-            <div class="form-grid">
-                <input type="text" id="nombre" placeholder="Nombre del Producto">
-                <input type="text" id="desc" placeholder="Descripción corta">
-                <input type="number" id="precio" placeholder="Precio ($)">
-                <input type="number" id="stock" placeholder="Stock disponible">
-
-                <select id="categoria"
-                    style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">
-                    <option value="General">Categoría: General</option>
-                    <option value="Harinas">Harinas / Premix</option>
-                    <option value="Snacks">Snacks / Galletitas</option>
-                    <option value="Bebidas">Bebidas</option>
-                    <option value="Reposteria">Repostería</option>
-                </select>
-
-                <button class="btn-guardar" onclick="agregarProducto()">+ AGREGAR A GÓNDOLA</button>
-            </div>
-        </div>
-
         <div class="filtros-container">
             <h2 style="margin-bottom: 15px;">Nuestros Productos</h2>
-
-            <input type="text" id="inputBusqueda" placeholder="Buscar en VitalTacc (ej: Fideos, Harina...)"
+            <input type="text" id="inputBusqueda" placeholder="Buscar en VitalTacc..."
                 style="width: 100%; padding: 15px; border-radius: 50px; border: 2px solid #eee; margin-bottom: 20px; outline: none; font-size: 16px; box-sizing: border-box;"
                 onkeyup="filtrarPorNombre()">
 
@@ -90,13 +69,13 @@
             </div>
         </div>
 
-        <div id="gridProductos" class="productos-grid"></div>
+        <div id="gridProductos" class="productos-grid">
+        </div>
     </div>
 
     <div id="modalConfirmacion" class="modal-ml">
         <div class="modal-content-ml">
             <span class="close-modal" onclick="cerrarModal()">&times;</span>
-
             <div class="modal-header-ml">
                 <div class="product-img-circle">
                     <div id="modal-icono-resumen" style="font-size: 30px;">📦</div>
@@ -104,16 +83,14 @@
                 </div>
                 <div>
                     <h3 id="modal-titulo-producto">Agregaste a tu carrito</h3>
-                    <p id="modal-detalle-producto" style="color: #666; font-size: 14px; margin: 5px 0 0 0;">1 unidad</p>
+                    <p id="modal-detalle-producto">1 unidad añadida con éxito.</p>
                 </div>
             </div>
-
             <div class="modal-sugerencias">
                 <p style="font-weight: bold; margin-bottom: 15px; color: #333; font-size: 14px;">También te puede
                     interesar...</p>
                 <div class="sugerencias-grid" id="sugerencias-container"></div>
             </div>
-
             <div class="modal-actions-ml">
                 <button class="btn-azul-relleno" onclick="cerrarModal()">Ver más productos</button>
                 <button class="btn-azul-suave" onclick="irAlCarrito()">Ir al carrito</button>
@@ -126,6 +103,7 @@
         let carrito = [];
         let productosCache = [];
 
+        // Función para cargar productos desde el Backend (Spring Boot)
         async function cargarProductos() {
             try {
                 const res = await fetch(API_URL);
@@ -134,118 +112,84 @@
                 grid.innerHTML = '';
 
                 productosCache.forEach(p => {
+                    const stockAgotado = p.stock <= 0;
                     grid.innerHTML += `
-                        <div class="card" data-categoria="${p.categoria || 'General'}">
+                        <div class="card ${stockAgotado ? 'sin-stock' : ''}" data-categoria="${p.categoria || 'General'}">
                             <div style="font-size: 3.5rem; margin-bottom: 15px;">${obtenerIcono(p.categoria)}</div>
                             <h3>${p.nombre}</h3>
-                            <p>${p.descripcion}</p>
+                            <p>${p.descripcion || 'Producto libre de gluten'}</p>
                             <div class="price">$${p.precio}</div>
-                            <div style="margin-bottom: 15px; color: #555;">Disponibles: <b>${p.stock}</b></div>
-                            <button class="btn-comprar" onclick="comprar('${p.nombre}', ${p.precio}, '${p.categoria}')">
-                                🛒 Agregar al Carrito
+                            <p style="font-size: 0.8rem; color: #777;">Stock: ${p.stock} un.</p>
+                            <button class="btn-comprar" onclick="comprar('${p.nombre}', ${p.precio}, '${p.categoria}')" ${stockAgotado ? 'disabled' : ''}>
+                                ${stockAgotado ? 'Sin Stock' : '🛒 Agregar al Carrito'}
                             </button>
-                            <button class="btn-delete" onclick="borrar(${p.id})">Eliminar de Stock</button>
                         </div>
                     `;
                 });
             } catch (error) {
-                console.error("Error al cargar productos:", error);
+                console.error("Error conectando con el servidor:", error);
+                document.getElementById('gridProductos').innerHTML = "<p>Error al cargar productos. Asegurate de que el Backend esté corriendo.</p>";
             }
         }
 
         function obtenerIcono(cat) {
-            if (cat === 'Harinas') return '🌾';
-            if (cat === 'Snacks') return '🍪';
-            if (cat === 'Bebidas') return '🥤';
-            if (cat === 'Reposteria') return '🍰';
-            return '📦';
+            const iconos = { 'Harinas': '🌾', 'Snacks': '🍪', 'Bebidas': '🥤', 'Reposteria': '🍰' };
+            return iconos[cat] || '📦';
         }
 
         function comprar(nombre, precio, categoria) {
             carrito.push({ nombre, precio });
             document.getElementById('contador-carrito').innerText = carrito.length;
-
             document.getElementById('modal-icono-resumen').innerText = obtenerIcono(categoria);
             mostrarModalConfirmacion(nombre);
         }
 
         function mostrarModalConfirmacion(nombreAgregado) {
             document.getElementById('modal-titulo-producto').innerText = `Agregaste ${nombreAgregado}`;
-            const sugerenciasContainer = document.getElementById('sugerencias-container');
-            sugerenciasContainer.innerHTML = '';
+            const sugContainer = document.getElementById('sugerencias-container');
+            sugContainer.innerHTML = '';
 
-            const otros = productosCache.filter(p => p.nombre !== nombreAgregado).sort(() => 0.5 - Math.random()).slice(0, 2);
-
-            otros.forEach(s => {
-                sugerenciasContainer.innerHTML += `
-                    <div class="sug-card">
-                        <div style="font-size: 1.5rem; margin-bottom: 5px;">${obtenerIcono(s.categoria)}</div>
-                        <div style="font-weight: 600; font-size: 12px; height: 30px; overflow: hidden;">${s.nombre}</div>
-                        <div style="color: #3483fa; font-weight: bold; margin-top: 5px;">$${s.precio}</div>
-                    </div>
-                `;
-            });
-
+            // Sugerimos 2 productos distintos al que se acaba de agregar
+            productosCache
+                .filter(p => p.nombre !== nombreAgregado && p.stock > 0)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 2)
+                .forEach(s => {
+                    sugContainer.innerHTML += `
+                        <div class="sug-card">
+                            <div style="font-size: 1.5rem;">${obtenerIcono(s.categoria)}</div>
+                            <div style="font-weight: 600; font-size: 12px;">${s.nombre}</div>
+                            <div style="color: #3483fa; font-weight: bold;">$${s.precio}</div>
+                        </div>`;
+                });
             document.getElementById('modalConfirmacion').style.display = 'flex';
         }
 
-        // BUSCADOR CORREGIDO
         function filtrarPorNombre() {
             const texto = document.getElementById('inputBusqueda').value.toLowerCase();
-            const productos = document.querySelectorAll('.card');
-            productos.forEach(card => {
+            document.querySelectorAll('.card').forEach(card => {
                 const nombre = card.querySelector('h3').innerText.toLowerCase();
-                // Usamos "" para que respete el estilo original del CSS
                 card.style.display = nombre.includes(texto) ? "" : "none";
             });
         }
 
-        // FILTRO POR BOTONES CORREGIDO
         function filtrarPorCategoria(cat, btn) {
             document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
-            const productos = document.querySelectorAll('.card');
-            productos.forEach(card => {
-                const categoriaCard = card.getAttribute('data-categoria');
-                // Usamos "" para que respete el estilo original del CSS
-                card.style.display = (cat === 'Todos' || categoriaCard === cat) ? "" : "none";
+            document.querySelectorAll('.card').forEach(card => {
+                const catCard = card.getAttribute('data-categoria');
+                card.style.display = (cat === 'Todos' || catCard === cat) ? "" : "none";
             });
         }
 
         function cerrarModal() { document.getElementById('modalConfirmacion').style.display = 'none'; }
 
         function irAlCarrito() {
-            alert("Redirigiendo al checkout - Items: " + carrito.length);
+            alert("Carrito actual: " + carrito.length + " productos.");
             cerrarModal();
         }
 
-        async function agregarProducto() {
-            const nuevo = {
-                nombre: document.getElementById('nombre').value,
-                descripcion: document.getElementById('desc').value,
-                precio: document.getElementById('precio').value,
-                stock: document.getElementById('stock').value,
-                categoria: document.getElementById('categoria').value
-            };
-            if (!nuevo.nombre || !nuevo.precio) return alert("Completa nombre y precio.");
-
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(nuevo)
-            });
-            document.querySelectorAll('input').forEach(i => i.value = '');
-            cargarProductos();
-        }
-
-        async function borrar(id) {
-            if (confirm('¿Desea quitar este producto?')) {
-                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                cargarProductos();
-            }
-        }
-
+        // Carga inicial al abrir la página
         cargarProductos();
     </script>
 </body>
