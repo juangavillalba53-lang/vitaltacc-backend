@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "productos")
 @Data
 public class Producto {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,12 +16,10 @@ public class Producto {
     private String nombre;
     private String descripcion;
     private Double precio;
-    private Integer stock;
+    private Integer stockMinimo;
     private String categoria;
 
-    // Relación: Un producto puede tener muchos lotes
-    // 'mappedBy' debe coincidir con el nombre del atributo 'producto' en Lote.java
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("producto") // Evita bucles infinitos al convertir a JSON
+    @JsonIgnoreProperties("producto")
     private List<Lote> lotes;
 }

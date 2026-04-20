@@ -89,6 +89,9 @@
                         if (diffDays < 15) esCritico = true;
                     }
 
+                    // Calculamos el stock total sumando las cantidades de sus lotes
+                    const stockTotal = tieneLotes ? p.lotes.reduce((acc, l) => acc + l.cantidad, 0) : 0;
+
                     tabla.innerHTML += `
                         <tr class="${esCritico ? 'fila-critica' : ''}">
                             <td>
@@ -103,8 +106,8 @@
                                 ${fechaAMostrar} ${esCritico ? '⚠️' : ''}
                             </td>
                             <td>
-                                <span class="badge-stock ${p.stock < 5 ? 'stock-bajo' : 'stock-ok'}">
-                                    ${p.stock} un.
+                                <span class="badge-stock ${stockTotal < (p.stockMinimo || 5) ? 'stock-bajo' : 'stock-ok'}">
+                                    ${stockTotal} un.
                                 </span>
                             </td>
                             <td>$${p.precio}</td>
@@ -121,7 +124,7 @@
                     `;
                 });
             } catch (error) {
-                console.error("Error:", error);
+                console.error("Error al cargar inventario:", error);
             }
         }
 
@@ -134,33 +137,59 @@
             const fechaVencimiento = document.getElementById('vencimiento').value;
             const stock = document.getElementById('stock').value;
 
-            if (!nombre || !lote || !fechaVencimiento) {
-                alert("Completa los campos obligatorios");
+            if (!nombre || !lote || !fechaVencimiento || !stock) {
+                alert("Completa los campos obligatorios: Nombre, Lote, Vencimiento y Cantidad");
                 return;
             }
 
-            const nuevo = { nombre, categoria, descripcion, precio, lote, fechaVencimiento, stock };
+            // Mapeo exacto para que coincida con el DTO/Controller de Java
+            const nuevo = {
+                nombre: nombre,
+                categoria: categoria,
+                descripcion: descripcion,
+                precio: parseFloat(precio),
+                numeroLote: lote,
+                fechaVencimiento: fechaVencimiento,
+                cantidad: parseInt(stock),
+                stockMinimo: 5 // Valor por defecto para alertas
+            };
 
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(nuevo)
-            });
-            limpiarForm();
-            cargarInventario();
+            try {
+                const response = await fetch(`${API_URL}/con-lote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevo)
+                });
+
+                if (response.ok) {
+                    alert("¡Producto y Lote guardados correctamente!");
+                    limpiarForm();
+                    cargarInventario();
+                } else {
+                    const errorMsg = await response.text();
+                    alert("Error al guardar: " + errorMsg);
+                }
+            } catch (error) {
+                console.error("Error en la petición:", error);
+                alert("No se pudo conectar con el servidor.");
+            }
         }
 
         async function gestionarPromo(id) {
             const pct = prompt("Porcentaje de descuento:");
             if (pct && !isNaN(pct)) {
-                const res = await fetch(`${API_URL}/${id}/descuento`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ porcentaje: parseFloat(pct) })
-                });
-                if (res.ok) {
-                    alert(`¡Descuento aplicado!`);
-                    cargarInventario();
+                try {
+                    const res = await fetch(`${API_URL}/${id}/descuento`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ porcentaje: parseFloat(pct) })
+                    });
+                    if (res.ok) {
+                        alert(`¡Descuento aplicado!`);
+                        cargarInventario();
+                    }
+                } catch (error) {
+                    console.error("Error al aplicar descuento:", error);
                 }
             }
         }
@@ -171,12 +200,19 @@
         }
 
         async function borrar(id) {
-            if (confirm('¿Seguro desea eliminar?')) {
-                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                cargarInventario();
+            if (confirm('¿Seguro desea eliminar este producto?')) {
+                try {
+                    const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        cargarInventario();
+                    }
+                } catch (error) {
+                    console.error("Error al borrar:", error);
+                }
             }
         }
 
+        // Carga inicial al abrir la página
         cargarInventario();
     </script>
 </body>

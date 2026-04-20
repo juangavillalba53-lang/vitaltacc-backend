@@ -79,14 +79,17 @@
                 grid.innerHTML = '';
 
                 productosCache.forEach(p => {
-                    const stockAgotado = p.stock <= 0;
+                    // LÓGICA DE ANALISTA: Calculamos el stock total sumando los lotes
+                    const stockTotal = p.lotes ? p.lotes.reduce((acc, lote) => acc + lote.cantidad, 0) : 0;
+                    const stockAgotado = stockTotal <= 0;
+
                     grid.innerHTML += `
                         <div class="card ${stockAgotado ? 'sin-stock' : ''}" data-categoria="${p.categoria || 'General'}">
                             <div style="font-size: 3.5rem; margin-bottom: 15px;">${obtenerIcono(p.categoria)}</div>
                             <h3>${p.nombre}</h3>
                             <p title="${p.descripcion || ''}">${p.descripcion || 'Producto libre de gluten'}</p>
                             <div class="price">$${p.precio}</div>
-                            <p class="stock-label">Stock: ${p.stock} un.</p>
+                            <p class="stock-label">Stock: ${stockTotal} un.</p>
                             <button class="btn-comprar" onclick="comprar('${p.nombre}', ${p.precio}, '${p.categoria}')" ${stockAgotado ? 'disabled' : ''}>
                                 ${stockAgotado ? 'Sin Stock' : '🛒 Agregar al Carrito'}
                             </button>
@@ -117,7 +120,10 @@
             sugContainer.innerHTML = '';
 
             productosCache
-                .filter(p => p.nombre !== nombreAgregado && p.stock > 0)
+                .filter(p => {
+                    const stockTotal = p.lotes ? p.lotes.reduce((acc, l) => acc + l.cantidad, 0) : 0;
+                    return p.nombre !== nombreAgregado && stockTotal > 0;
+                })
                 .sort(() => 0.5 - Math.random())
                 .slice(0, 2)
                 .forEach(s => {
