@@ -2,30 +2,28 @@ package vitaltacc.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import lombok.Data; // Si usas Lombok, esto crea los setters solos
+import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "lote")
-@Data // Esta etiqueta de Lombok genera automáticamente el setNumeroLote
+@Data
 public class Lote {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "producto_id")
-    private Producto producto;
+    @Column(name = "numero_lote")
+    private String numeroLote;
 
     private Integer cantidad;
 
-    // ASEGURATE QUE ESTA VARIABLE SE LLAME ASÍ:
-    private String numeroLote;
-
+    @Column(name = "fecha_vencimiento")
     private LocalDate fechaVencimiento;
 
-    // Si NO usas @Data de Lombok, agregá esto a mano:
-    public void setNumeroLote(String numeroLote) {
-        this.numeroLote = numeroLote;
-    }
+    @ManyToOne
+    @JoinColumn(name = "producto_id")
+    @JsonBackReference // Esto evita errores de bucle infinito al convertir a JSON
+    private Producto producto;
 }

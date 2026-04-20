@@ -31,6 +31,7 @@ public class ProductoController {
     public Producto guardarProductoConLote(@RequestBody Map<String, Object> datos) {
         String nombre = (String) datos.get("nombre");
         String categoria = (String) datos.get("categoria");
+        String descripcion = (String) datos.get("descripcion"); // Nuevo: captura la descripción
         Double precio = Double.parseDouble(datos.get("precio").toString());
         Integer cantidad = Integer.parseInt(datos.get("stock").toString());
         String fechaVencRaw = (String) datos.get("fechaVencimiento");
@@ -42,6 +43,7 @@ public class ProductoController {
 
         producto.setNombre(nombre);
         producto.setCategoria(categoria);
+        producto.setDescripcion(descripcion); // Nuevo: guarda la descripción
         producto.setPrecio(precio);
 
         // Actualizamos stock total
@@ -50,6 +52,7 @@ public class ProductoController {
 
         Producto productoGuardado = productoRepository.save(producto);
 
+        // 2. Creamos el Lote vinculado
         Lote nuevoLote = new Lote();
         nuevoLote.setProducto(productoGuardado);
         nuevoLote.setCantidad(cantidad);
@@ -59,6 +62,21 @@ public class ProductoController {
         loteRepository.save(nuevoLote);
 
         return productoGuardado;
+    }
+
+    // NUEVO: Método para aplicar descuento manual (%)
+    @PatchMapping("/{id}/descuento")
+    public Producto aplicarDescuento(@PathVariable Long id, @RequestBody Map<String, Double> datos) {
+        Double porcentaje = datos.get("porcentaje");
+        Producto p = productoRepository.findById(id).orElseThrow();
+
+        // Calculamos el nuevo precio bajando el X% que vos ingreses
+        Double nuevoPrecio = p.getPrecio() * (1 - (porcentaje / 100));
+
+        // Redondeamos a 2 decimales para que no quede un número largo
+        p.setPrecio(Math.round(nuevoPrecio * 100.0) / 100.0);
+
+        return productoRepository.save(p);
     }
 
     @DeleteMapping("/{id}")

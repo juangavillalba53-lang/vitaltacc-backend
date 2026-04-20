@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitalTacc - Ingreso</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+
+<body class="login-body">
+
+    <div class="login-card">
+        <div class="logo-text" style="margin-bottom: 10px;">VITAL<span>TACC</span></div>
+        <p style="color: #666; margin-bottom: 25px; font-weight: 500;">Gestión Interna</p>
+
+        <input type="email" id="email" placeholder="Correo electrónico">
+        <input type="password" id="contrasena" placeholder="Contraseña">
+
+        <button class="btn-login" onclick="login()">INGRESAR</button>
+
+        <p id="mensajeError" class="error-msg">Email o contraseña incorrectos</p>
+    </div>
+
+    <script>
+        async function login() {
+            const emailInput = document.getElementById('email').value;
+            const passInput = document.getElementById('contrasena').value;
+            const errorLabel = document.getElementById('mensajeError');
+
+            errorLabel.style.display = 'none';
+
+            if (!emailInput || !passInput) {
+                alert("Por favor, completa todos los campos.");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8080/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: emailInput,
+                        contrasena: passInput
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Estandarizamos el rol a Mayúsculas para evitar errores de comparación
+                    const rolFormateado = data.rol.toUpperCase();
+
+                    // Guardamos la sesión localmente
+                    localStorage.setItem('usuarioNombre', data.nombre);
+                    localStorage.setItem('rol', rolFormateado);
+
+                    // Redirección profesional comparando siempre en mayúsculas
+                    if (rolFormateado === 'ADMIN') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    errorLabel.style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Error en el login:", error);
+                alert("Error de conexión. Asegurate que el Backend esté corriendo.");
+            }
+        }
+    </script>
+</body>
+
+</html>

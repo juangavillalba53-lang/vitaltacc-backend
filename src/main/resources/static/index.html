@@ -6,38 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VitalTacc - Tienda Online</title>
     <link rel="stylesheet" href="estilos.css">
-    <style>
-        .filtros-container {
-            margin-bottom: 35px;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-filtro {
-            padding: 10px 20px;
-            border-radius: 25px;
-            border: 1px solid #ddd;
-            background: white;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: 500;
-        }
-
-        .btn-filtro.active {
-            background: #00a1b4;
-            /* Celeste VitalTacc */
-            color: white;
-            border-color: #00a1b4;
-        }
-
-        .sin-stock {
-            filter: grayscale(1);
-            opacity: 0.7;
-            pointer-events: none;
-        }
-    </style>
 </head>
 
 <body>
@@ -103,7 +71,6 @@
         let carrito = [];
         let productosCache = [];
 
-        // Función para cargar productos desde el Backend (Spring Boot)
         async function cargarProductos() {
             try {
                 const res = await fetch(API_URL);
@@ -117,9 +84,9 @@
                         <div class="card ${stockAgotado ? 'sin-stock' : ''}" data-categoria="${p.categoria || 'General'}">
                             <div style="font-size: 3.5rem; margin-bottom: 15px;">${obtenerIcono(p.categoria)}</div>
                             <h3>${p.nombre}</h3>
-                            <p>${p.descripcion || 'Producto libre de gluten'}</p>
+                            <p title="${p.descripcion || ''}">${p.descripcion || 'Producto libre de gluten'}</p>
                             <div class="price">$${p.precio}</div>
-                            <p style="font-size: 0.8rem; color: #777;">Stock: ${p.stock} un.</p>
+                            <p class="stock-label">Stock: ${p.stock} un.</p>
                             <button class="btn-comprar" onclick="comprar('${p.nombre}', ${p.precio}, '${p.categoria}')" ${stockAgotado ? 'disabled' : ''}>
                                 ${stockAgotado ? 'Sin Stock' : '🛒 Agregar al Carrito'}
                             </button>
@@ -128,7 +95,7 @@
                 });
             } catch (error) {
                 console.error("Error conectando con el servidor:", error);
-                document.getElementById('gridProductos').innerHTML = "<p>Error al cargar productos. Asegurate de que el Backend esté corriendo.</p>";
+                document.getElementById('gridProductos').innerHTML = "<p>Error al cargar productos.</p>";
             }
         }
 
@@ -149,7 +116,6 @@
             const sugContainer = document.getElementById('sugerencias-container');
             sugContainer.innerHTML = '';
 
-            // Sugerimos 2 productos distintos al que se acaba de agregar
             productosCache
                 .filter(p => p.nombre !== nombreAgregado && p.stock > 0)
                 .sort(() => 0.5 - Math.random())
@@ -189,7 +155,6 @@
             cerrarModal();
         }
 
-        // Carga inicial al abrir la página
         cargarProductos();
     </script>
 </body>
