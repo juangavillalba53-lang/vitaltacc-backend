@@ -10,12 +10,30 @@
 
 <body>
 
+    <button class="btn-flotante-registro" onclick="abrirRegistro()">REGÍSTRATE</button>
+
+    <div id="modalBienvenida" class="modal-overlay">
+        <div class="modal-bienvenida-content">
+            <span class="close-modal-btn" onclick="cerrarBienvenida()">&times;</span>
+            <div class="bienvenida-header">
+                <div class="logo-text">VITAL<span>TACC</span></div>
+                <h3>¡Bienvenido a nuestra tienda!</h3>
+                <p>Inicia sesión para una mejor experiencia o regístrate para obtener beneficios.</p>
+            </div>
+            <div class="bienvenida-actions">
+                <button class="btn-azul-relleno" onclick="irAlLogin()">ACCEDER AHORA</button>
+                <button class="btn-azul-suave" onclick="abrirRegistro()">CREAR CUENTA</button>
+                <p class="omitir-link" onclick="cerrarBienvenida()">Omitir por ahora</p>
+            </div>
+        </div>
+    </div>
+
     <header>
         <div class="logo-container">
             <div class="logo-text">VITAL<span>TACC</span></div>
-            <div style="color: #888; font-weight: 500; font-size: 0.8rem;">Tienda de Alimentos Sin TACC</div>
+            <div class="header-subtitle">Tienda de Alimentos Sin TACC</div>
         </div>
-        <div class="carrito-container" style="cursor: pointer;" onclick="irAlCarrito()">
+        <div class="carrito-container" onclick="irAlCarrito()">
             <span>🛒 Mi Carrito</span>
             <span id="contador-carrito" class="badge-carrito">0</span>
         </div>
@@ -23,142 +41,247 @@
 
     <div class="container">
         <div class="filtros-container">
-            <h2 style="margin-bottom: 15px;">Nuestros Productos</h2>
-            <input type="text" id="inputBusqueda" placeholder="Buscar en VitalTacc..."
-                style="width: 100%; padding: 15px; border-radius: 50px; border: 2px solid #eee; margin-bottom: 20px; outline: none; font-size: 16px; box-sizing: border-box;"
+            <h2>Nuestros Productos</h2>
+            <input type="text" id="inputBusqueda" placeholder="Buscar en VitalTacc..." class="input-busqueda-pro"
                 onkeyup="filtrarPorNombre()">
 
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div class="botones-filtro-container">
                 <button class="btn-filtro active" onclick="filtrarPorCategoria('Todos', this)">Todos</button>
                 <button class="btn-filtro" onclick="filtrarPorCategoria('Harinas', this)">Harinas</button>
                 <button class="btn-filtro" onclick="filtrarPorCategoria('Snacks', this)">Snacks</button>
                 <button class="btn-filtro" onclick="filtrarPorCategoria('Bebidas', this)">Bebidas</button>
-                <button class="btn-filtro" onclick="filtrarPorCategoria('Reposteria', this)">Repostería</button>
             </div>
         </div>
+        <div id="gridProductos" class="productos-grid"></div>
+    </div>
 
-        <div id="gridProductos" class="productos-grid">
+    <div id="modalCarrito" class="modal-ml">
+        <div class="modal-content-ml">
+            <div class="modal-header-ml">
+                <span class="close-modal" onclick="cerrarCarrito()">&times;</span>
+                <div class="logo-text">VITAL<span>TACC</span></div>
+            </div>
+            <div class="carrito-body">
+                <h3>Tu Pedido</h3>
+                <div id="lista-carrito">
+                    <p style="text-align:center; color:#888; margin-top:20px;">El carrito está vacío.</p>
+                </div>
+            </div>
+            <div class="carrito-footer">
+                <div class="subtotal-container">
+                    <span>Subtotal:</span>
+                    <span id="total-precio" class="precio-final">$ 0.00</span>
+                </div>
+                <p class="descuento-link">¿Tienes un código de descuento?</p>
+                <button class="btn-comprar-vital" onclick="procederAlPago()">FINALIZAR COMPRA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalRegistro" class="modal-ml">
+        <div class="modal-content-ml">
+            <span class="close-modal" onclick="cerrarRegistro()">&times;</span>
+            <div class="modal-header-ml">
+                <div class="logo-text">VITAL<span>TACC</span></div>
+            </div>
+            <h3>Crear Cuenta</h3>
+            <div class="modal-body-form">
+                <div class="form-group-vital"><label>Nombre Completo</label><input type="text" id="regNombre"></div>
+                <div class="form-group-vital"><label>DNI</label><input type="number" id="regDni"></div>
+                <div class="form-group-vital"><label>Email</label><input type="email" id="regEmail"></div>
+                <div class="form-group-vital"><label>Contraseña</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="regPass" placeholder="Mínimo 6 caracteres">
+                        <span class="toggle-password" onclick="togglePassword('regPass')">👁️</span>
+                    </div>
+                </div>
+                <button class="btn-azul-relleno" style="margin-top:10px;">REGISTRARSE</button>
+            </div>
         </div>
     </div>
 
     <div id="modalConfirmacion" class="modal-ml">
         <div class="modal-content-ml">
-            <span class="close-modal" onclick="cerrarModal()">&times;</span>
-            <div class="modal-header-ml">
-                <div class="product-img-circle">
-                    <div id="modal-icono-resumen" style="font-size: 30px;">📦</div>
-                    <div class="check-icon">✓</div>
-                </div>
-                <div>
-                    <h3 id="modal-titulo-producto">Agregaste a tu carrito</h3>
-                    <p id="modal-detalle-producto">1 unidad añadida con éxito.</p>
-                </div>
-            </div>
-            <div class="modal-sugerencias">
-                <p style="font-weight: bold; margin-bottom: 15px; color: #333; font-size: 14px;">También te puede
-                    interesar...</p>
-                <div class="sugerencias-grid" id="sugerencias-container"></div>
-            </div>
-            <div class="modal-actions-ml">
-                <button class="btn-azul-relleno" onclick="cerrarModal()">Ver más productos</button>
-                <button class="btn-azul-suave" onclick="irAlCarrito()">Ir al carrito</button>
+            <span class="close-modal" onclick="cerrarConfirmacion()">&times;</span>
+            <h3>Confirmar Envío</h3>
+            <p>Verificá tus datos para recibir el comprobante.</p>
+            <div class="modal-body-form">
+                <div class="form-group-vital"><label>DNI</label><input type="number" id="inputDni"></div>
+                <div class="form-group-vital"><label>Email</label><input type="email" id="inputEmail"></div>
+                <button class="btn-azul-relleno" onclick="finalizarVenta()">CONFIRMAR Y PAGAR</button>
             </div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8080/productos';
+        const API_PROD = 'http://localhost:8080/productos';
+        const API_VENTAS = 'http://localhost:8080/ventas/realizar';
         let carrito = [];
-        let productosCache = [];
 
+        window.onload = () => {
+            // Para el examen: mostramos siempre el cartel de bienvenida
+            document.getElementById('modalBienvenida').style.display = 'flex';
+        };
+
+        // --- FUNCIONES DE NAVEGACIÓN ---
+        function cerrarBienvenida() { document.getElementById('modalBienvenida').style.display = 'none'; }
+
+        // MODIFICADO: Ahora abre el registro internamente en lugar de ir a otra página
+        function irAlLogin() {
+            cerrarBienvenida();
+            abrirRegistro();
+        }
+
+        function abrirRegistro() {
+            cerrarBienvenida();
+            document.getElementById('modalRegistro').style.display = 'flex';
+        }
+
+        function cerrarRegistro() { document.getElementById('modalRegistro').style.display = 'none'; }
+        function irAlCarrito() { actualizarCarritoUI(); document.getElementById('modalCarrito').style.display = 'flex'; }
+        function cerrarCarrito() { document.getElementById('modalCarrito').style.display = 'none'; }
+        function cerrarConfirmacion() { document.getElementById('modalConfirmacion').style.display = 'none'; }
+
+        // --- LÓGICA DEL PRODUCTO ---
         async function cargarProductos() {
-            try {
-                const res = await fetch(API_URL);
-                productosCache = await res.json();
-                const grid = document.getElementById('gridProductos');
-                grid.innerHTML = '';
+            const res = await fetch(API_PROD);
+            const productos = await res.json();
+            const grid = document.getElementById('gridProductos');
+            grid.innerHTML = '';
 
-                productosCache.forEach(p => {
-                    // LÓGICA DE ANALISTA: Calculamos el stock total sumando los lotes
-                    const stockTotal = p.lotes ? p.lotes.reduce((acc, lote) => acc + lote.cantidad, 0) : 0;
-                    const stockAgotado = stockTotal <= 0;
+            productos.forEach(p => {
+                const stockTotal = p.lotes ? p.lotes.reduce((acc, l) => acc + l.cantidad, 0) : 0;
+                const estaAgotado = stockTotal <= 0;
 
-                    grid.innerHTML += `
-                        <div class="card ${stockAgotado ? 'sin-stock' : ''}" data-categoria="${p.categoria || 'General'}">
-                            <div style="font-size: 3.5rem; margin-bottom: 15px;">${obtenerIcono(p.categoria)}</div>
-                            <h3>${p.nombre}</h3>
-                            <p title="${p.descripcion || ''}">${p.descripcion || 'Producto libre de gluten'}</p>
-                            <div class="price">$${p.precio}</div>
-                            <p class="stock-label">Stock: ${stockTotal} un.</p>
-                            <button class="btn-comprar" onclick="comprar('${p.nombre}', ${p.precio}, '${p.categoria}')" ${stockAgotado ? 'disabled' : ''}>
-                                ${stockAgotado ? 'Sin Stock' : '🛒 Agregar al Carrito'}
-                            </button>
+                grid.innerHTML += `
+                    <div class="card ${estaAgotado ? 'sin-stock' : ''}">
+                        <div class="img-container-card">${obtenerIcono(p.categoria)}</div>
+                        <h3>${p.nombre}</h3>
+                        <div class="price-vital">$${p.precio}</div>
+                        <p class="stock-info">${stockTotal} disponibles</p>
+                        <div class="cantidad-control">
+                            <button class="btn-cantidad" onclick="cambiarCant(${p.id}, -1)">-</button>
+                            <input type="number" id="cant-${p.id}" value="${estaAgotado ? 0 : 1}" min="${estaAgotado ? 0 : 1}" max="${stockTotal}" readonly>
+                            <button class="btn-cantidad" onclick="cambiarCant(${p.id}, 1)">+</button>
                         </div>
-                    `;
-                });
-            } catch (error) {
-                console.error("Error conectando con el servidor:", error);
-                document.getElementById('gridProductos').innerHTML = "<p>Error al cargar productos.</p>";
+                        <button class="btn-comprar-vital" onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio})" ${estaAgotado ? 'disabled' : ''}>
+                            ${estaAgotado ? 'AGOTADO' : 'AÑADIR AL CARRITO'}
+                        </button>
+                    </div>`;
+            });
+        }
+
+        function cambiarCant(id, delta) {
+            const input = document.getElementById(`cant-${id}`);
+            let val = parseInt(input.value) + delta;
+            if (val >= 1 && val <= parseInt(input.max)) input.value = val;
+        }
+
+        function agregarAlCarrito(id, nombre, precio) {
+            const cant = parseInt(document.getElementById(`cant-${id}`).value);
+            const item = carrito.find(i => i.producto.id === id);
+            if (item) item.cantidad += cant;
+            else carrito.push({ producto: { id: id }, nombre: nombre, cantidad: cant, precioUnitario: precio });
+            actualizarContador();
+            irAlCarrito();
+        }
+
+        function actualizarContador() {
+            document.getElementById('contador-carrito').innerText = carrito.reduce((acc, i) => acc + i.cantidad, 0);
+        }
+
+        function actualizarCarritoUI() {
+            const lista = document.getElementById('lista-carrito');
+            const totalTxt = document.getElementById('total-precio');
+            let total = 0;
+            lista.innerHTML = '';
+
+            if (carrito.length === 0) {
+                lista.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">El carrito está vacío.</p>';
+                totalTxt.innerText = '$ 0.00';
+                return;
             }
+
+            carrito.forEach((item, index) => {
+                const sub = item.cantidad * item.precioUnitario;
+                total += sub;
+                lista.innerHTML += `
+                    <div class="item-carrito-lista">
+                        <div>
+                            <strong>${item.nombre}</strong><br>
+                            <small>${item.cantidad} x $${item.precioUnitario}</small>
+                        </div>
+                        <div style="font-weight:bold">$${sub.toFixed(2)}</div>
+                        <button onclick="eliminarItem(${index})" style="border:none; background:none; cursor:pointer;">❌</button>
+                    </div>`;
+            });
+            totalTxt.innerText = `$ ${total.toFixed(2)}`;
         }
 
-        function obtenerIcono(cat) {
-            const iconos = { 'Harinas': '🌾', 'Snacks': '🍪', 'Bebidas': '🥤', 'Reposteria': '🍰' };
-            return iconos[cat] || '📦';
+        function eliminarItem(index) {
+            carrito.splice(index, 1);
+            actualizarContador();
+            actualizarCarritoUI();
         }
 
-        function comprar(nombre, precio, categoria) {
-            carrito.push({ nombre, precio });
-            document.getElementById('contador-carrito').innerText = carrito.length;
-            document.getElementById('modal-icono-resumen').innerText = obtenerIcono(categoria);
-            mostrarModalConfirmacion(nombre);
-        }
-
-        function mostrarModalConfirmacion(nombreAgregado) {
-            document.getElementById('modal-titulo-producto').innerText = `Agregaste ${nombreAgregado}`;
-            const sugContainer = document.getElementById('sugerencias-container');
-            sugContainer.innerHTML = '';
-
-            productosCache
-                .filter(p => {
-                    const stockTotal = p.lotes ? p.lotes.reduce((acc, l) => acc + l.cantidad, 0) : 0;
-                    return p.nombre !== nombreAgregado && stockTotal > 0;
-                })
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 2)
-                .forEach(s => {
-                    sugContainer.innerHTML += `
-                        <div class="sug-card">
-                            <div style="font-size: 1.5rem;">${obtenerIcono(s.categoria)}</div>
-                            <div style="font-weight: 600; font-size: 12px;">${s.nombre}</div>
-                            <div style="color: #3483fa; font-weight: bold;">$${s.precio}</div>
-                        </div>`;
-                });
+        function procederAlPago() {
+            if (carrito.length === 0) return;
+            cerrarCarrito();
             document.getElementById('modalConfirmacion').style.display = 'flex';
         }
 
+        async function finalizarVenta() {
+            const dni = document.getElementById('inputDni').value;
+            const email = document.getElementById('inputEmail').value;
+            if (!dni || !email) return alert("DNI y Email obligatorios.");
+
+            const v = {
+                metodoPago: "efectivo",
+                tipoVenta: "web",
+                cliente: { dni, email, nombre: localStorage.getItem('usuarioNombre') || "Cliente Web" },
+                details: carrito.map(i => ({ producto: { id: i.producto.id }, cantidad: i.cantidad }))
+            };
+
+            const resp = await fetch(API_VENTAS, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(v)
+            });
+
+            if (resp.ok) {
+                alert("✅ ¡Compra exitosa!");
+                carrito = [];
+                actualizarContador();
+                cerrarConfirmacion();
+                cargarProductos();
+            } else {
+                alert("❌ Error al procesar la venta.");
+            }
+        }
+
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function obtenerIcono(c) {
+            const i = { 'Harinas': '🌾', 'Snacks': '🍪', 'Bebidas': '🥤' };
+            return i[c] || '📦';
+        }
+
         function filtrarPorNombre() {
-            const texto = document.getElementById('inputBusqueda').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(card => {
-                const nombre = card.querySelector('h3').innerText.toLowerCase();
-                card.style.display = nombre.includes(texto) ? "" : "none";
+            const txt = document.getElementById('inputBusqueda').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(c => {
+                c.style.display = c.querySelector('h3').innerText.toLowerCase().includes(txt) ? "" : "none";
             });
         }
 
         function filtrarPorCategoria(cat, btn) {
             document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.querySelectorAll('.card').forEach(card => {
-                const catCard = card.getAttribute('data-categoria');
-                card.style.display = (cat === 'Todos' || catCard === cat) ? "" : "none";
+            document.querySelectorAll('.card').forEach(c => {
+                c.style.display = (cat === 'Todos' || c.dataset.categoria === cat) ? "" : "none";
             });
-        }
-
-        function cerrarModal() { document.getElementById('modalConfirmacion').style.display = 'none'; }
-
-        function irAlCarrito() {
-            alert("Carrito actual: " + carrito.length + " productos.");
-            cerrarModal();
         }
 
         cargarProductos();

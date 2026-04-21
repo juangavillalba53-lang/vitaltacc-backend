@@ -14,15 +14,38 @@
         <div class="logo-text" style="margin-bottom: 10px;">VITAL<span>TACC</span></div>
         <p style="color: #666; margin-bottom: 25px; font-weight: 500;">Gestión Interna</p>
 
-        <input type="email" id="email" placeholder="Correo electrónico">
-        <input type="password" id="contrasena" placeholder="Contraseña">
+        <div class="modal-body-form" style="padding: 0; gap: 15px;">
+            <div class="form-group-vital">
+                <input type="email" id="email" placeholder="Correo electrónico">
+            </div>
 
-        <button class="btn-login" onclick="login()">INGRESAR</button>
+            <div class="form-group-vital">
+                <div class="password-wrapper">
+                    <input type="password" id="contrasena" placeholder="Contraseña">
+                    <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-login" onclick="login()" style="margin-top: 20px;">INGRESAR</button>
 
         <p id="mensajeError" class="error-msg">Email o contraseña incorrectos</p>
     </div>
 
     <script>
+        // Función para mostrar/ocultar contraseña
+        function togglePassword() {
+            const passInput = document.getElementById('contrasena');
+            const toggleIcon = document.querySelector('.toggle-password');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                toggleIcon.innerText = '🙈';
+            } else {
+                passInput.type = 'password';
+                toggleIcon.innerText = '👁️';
+            }
+        }
+
         async function login() {
             const emailInput = document.getElementById('email').value;
             const passInput = document.getElementById('contrasena').value;
@@ -55,8 +78,7 @@
                     localStorage.setItem('usuarioNombre', data.nombre);
                     localStorage.setItem('rol', rolFormateado);
 
-                    // MODIFICACIÓN: Ahora todos van al admin.html para poder gestionar stock
-                    // La distinción de qué pueden hacer se manejará dentro de admin.html
+                    // Redirección al panel de administración
                     window.location.href = 'admin.html';
 
                 } else {

@@ -5,16 +5,33 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "clientes")
 public class Cliente {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 100)
     private String nombre;
+
     private String telefono;
+
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
+
+    @Column(nullable = false)
+    private String contrasena; // Coincide con tu DB en español
+
+    @Column(nullable = false)
+    private String rol; // Por defecto será "CLIENTE"
+
+    @Column(nullable = false, unique = true, length = 20)
     private String dni;
 
-    // Getters y Setters
+    // --- CONSTRUCTORES ---
+    public Cliente() {
+    }
+
+    // --- GETTERS Y SETTERS ---
     public Long getId() {
         return id;
     }
@@ -45,6 +62,22 @@ public class Cliente {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 
     public String getDni() {

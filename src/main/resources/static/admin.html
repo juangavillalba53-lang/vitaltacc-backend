@@ -24,8 +24,23 @@
     </header>
 
     <div class="admin-container">
-        <div class="admin-panel">
-            <h2 style="margin: 0 0 20px 0;">Entrada de Mercadería (Lotes)</h2>
+
+        <div class="admin-panel" style="border-left: 5px solid var(--celeste);">
+            <h3 style="margin: 0 0 15px 0; color: var(--celeste);">📦 Reposición de Stock (Nuevo Lote)</h3>
+            <div class="form-grid">
+                <input type="number" id="repo-id" placeholder="ID del Producto">
+                <input type="text" id="repo-lote" placeholder="N° de Lote (Ej: L-100)">
+                <input type="number" id="repo-cantidad" placeholder="Cantidad que ingresa">
+                <input type="date" id="repo-vencimiento" title="Fecha de Vencimiento">
+                <button class="btn-guardar" onclick="reponerLoteExistente()" style="background: var(--verde-ml);">+
+                    CARGAR LOTES</button>
+            </div>
+            <p style="font-size: 11px; color: #888; margin-top: 10px;">* Usar para productos que ya figuran en la tabla
+                de abajo.</p>
+        </div>
+
+        <div class="admin-panel" style="margin-top: 20px;">
+            <h3 style="margin: 0 0 15px 0;">✨ Alta de Producto Nuevo</h3>
             <div class="form-grid">
                 <input type="text" id="nombre" placeholder="Nombre Producto">
                 <select id="categoria">
@@ -35,12 +50,12 @@
                     <option value="Bebidas">Bebidas</option>
                     <option value="Reposteria">Repostería</option>
                 </select>
-                <input type="text" id="descripcion" placeholder="Descripción (ej: Sin azúcar)">
-                <input type="number" id="precio" placeholder="Precio Venta ($)">
-                <input type="text" id="lote" placeholder="N° de Lote">
-                <input type="date" id="vencimiento" title="Fecha de Vencimiento">
-                <input type="number" id="stock" placeholder="Cantidad">
-                <button class="btn-guardar" onclick="agregarProductoAdmin()">+ CARGAR STOCK</button>
+                <input type="text" id="descripcion" placeholder="Descripción">
+                <input type="number" id="precio" placeholder="Precio ($)">
+                <input type="text" id="nuevo-lote-nro" placeholder="N° Lote inicial">
+                <input type="date" id="nuevo-lote-venc">
+                <input type="number" id="nuevo-lote-cant" placeholder="Cantidad inicial">
+                <button class="btn-guardar" onclick="agregarProductoNuevo()">CREAR PRODUCTO</button>
             </div>
         </div>
 
@@ -48,24 +63,24 @@
         <table class="tabla-gestion">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Producto</th>
                     <th>Categoría</th>
-                    <th>Lote</th>
-                    <th>Vencimiento</th>
                     <th>Stock Total</th>
+                    <th>Próx. Vencimiento</th>
                     <th>Precio</th>
-                    <th>Promo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="cuerpoTablaAdmin">
-            </tbody>
+            <tbody id="cuerpoTablaAdmin"></tbody>
         </table>
     </div>
 
     <script>
         const API_URL = 'http://localhost:8080/productos';
+        const API_LOTES = 'http://localhost:8080/lotes/guardar';
 
+        // 1. CARGAR TABLA CON LÓGICA DE FILTRADO DE LOTES VACÍOS
         async function cargarInventario() {
             try {
                 const res = await fetch(API_URL);
@@ -74,145 +89,134 @@
                 tabla.innerHTML = '';
 
                 productos.forEach(p => {
-                    const tieneLotes = p.lotes && p.lotes.length > 0;
-                    const primerLote = tieneLotes ? p.lotes[0] : null;
+                    const stockTotal = p.lotes ? p.lotes.reduce((acc, l) => acc + l.cantidad, 0) : 0;
 
-                    const hoy = new Date();
-                    let esCritico = false;
-                    let fechaAMostrar = '---';
+                    // LÓGICA MEJORADA: 
+                    // Buscamos el primer lote que tenga stock (> 0) para mostrar su fecha
+                    let loteActivo = p.lotes ? p.lotes.find(l => l.cantidad > 0) : null;
 
-                    if (primerLote && primerLote.fechaVencimiento) {
-                        const fechaVenc = new Date(primerLote.fechaVencimiento);
-                        fechaAMostrar = primerLote.fechaVencimiento;
-                        const diffTime = fechaVenc - hoy;
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        if (diffDays < 15) esCritico = true;
+                    // Si no hay lotes con stock, buscamos el que vence más pronto de la lista total
+                    if (!loteActivo && p.lotes && p.lotes.length > 0) {
+                        loteActivo = [...p.lotes].sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))[0];
                     }
 
-                    // Calculamos el stock total sumando las cantidades de sus lotes
-                    const stockTotal = tieneLotes ? p.lotes.reduce((acc, l) => acc + l.cantidad, 0) : 0;
+                    let proxVenc = loteActivo ? loteActivo.fechaVencimiento : "---";
+                    let esCritico = false;
+
+                    if (loteActivo && loteActivo.fechaVencimiento) {
+                        const hoy = new Date();
+                        const venc = new Date(loteActivo.fechaVencimiento);
+                        const diff = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+                        // Alerta si vence en menos de 15 días o si ya venció (diff <= 0)
+                        if (diff < 15) esCritico = true;
+                    }
 
                     tabla.innerHTML += `
                         <tr class="${esCritico ? 'fila-critica' : ''}">
+                            <td><b>${p.id}</b></td>
+                            <td>${p.nombre}</td>
+                            <td>${p.categoria}</td>
                             <td>
-                                <b>${p.nombre}</b><br>
-                                <div class="col-descripcion" title="${p.descripcion || ''}">
-                                    ${p.descripcion || ''}
-                                </div>
-                            </td>
-                            <td>${p.categoria || 'General'}</td>
-                            <td><code style="background: #eee; padding: 2px 5px;">${primerLote ? primerLote.numeroLote : 'N/A'}</code></td>
-                            <td class="${esCritico ? 'texto-alerta' : ''}">
-                                ${fechaAMostrar} ${esCritico ? '⚠️' : ''}
-                            </td>
-                            <td>
-                                <span class="badge-stock ${stockTotal < (p.stockMinimo || 5) ? 'stock-bajo' : 'stock-ok'}">
+                                <span class="badge-stock ${stockTotal < 5 ? 'stock-bajo' : 'stock-ok'}">
                                     ${stockTotal} un.
                                 </span>
                             </td>
-                            <td>$${p.precio}</td>
-                            <td>
-                                <button class="btn-accion btn-promo" onclick="gestionarPromo(${p.id})">
-                                    %
-                                </button>
+                            <td class="${esCritico ? 'texto-alerta' : ''}">
+                                ${proxVenc} ${esCritico ? '⚠️' : ''}
+                                ${(!loteActivo || stockTotal <= 0) ? '<br><small style="color:red">AGOTADO</small>' : ''}
                             </td>
+                            <td>$${p.precio}</td>
                             <td class="acciones-celda">
-                                <button class="btn-accion btn-edit" onclick="editar(${p.id})">✏️</button>
+                                <button class="btn-accion btn-edit" onclick="prepararReposicion(${p.id})" title="Cargar nuevo lote">📦+</button>
                                 <button class="btn-accion btn-borrar" onclick="borrar(${p.id})">🗑️</button>
                             </td>
                         </tr>
                     `;
                 });
-            } catch (error) {
-                console.error("Error al cargar inventario:", error);
-            }
+            } catch (error) { console.error(error); }
         }
 
-        async function agregarProductoAdmin() {
-            const nombre = document.getElementById('nombre').value;
-            const categoria = document.getElementById('categoria').value;
-            const descripcion = document.getElementById('descripcion').value;
-            const precio = document.getElementById('precio').value;
-            const lote = document.getElementById('lote').value;
-            const fechaVencimiento = document.getElementById('vencimiento').value;
-            const stock = document.getElementById('stock').value;
+        // 2. FUNCIÓN PARA REPOSICIÓN (OPCIÓN B)
+        async function reponerLoteExistente() {
+            const id = document.getElementById('repo-id').value;
+            const cant = document.getElementById('repo-cantidad').value;
+            const venc = document.getElementById('repo-vencimiento').value;
+            const nro = document.getElementById('repo-lote').value;
 
-            if (!nombre || !lote || !fechaVencimiento || !stock) {
-                alert("Completa los campos obligatorios: Nombre, Lote, Vencimiento y Cantidad");
-                return;
-            }
+            if (!id || !cant || !venc) return alert("Completa ID, Cantidad y Vencimiento");
 
-            // Mapeo exacto para que coincida con el DTO/Controller de Java
-            const nuevo = {
-                nombre: nombre,
-                categoria: categoria,
-                descripcion: descripcion,
-                precio: parseFloat(precio),
-                numeroLote: lote,
-                fechaVencimiento: fechaVencimiento,
-                cantidad: parseInt(stock),
-                stockMinimo: 5 // Valor por defecto para alertas
+            const loteData = {
+                numeroLote: nro,
+                cantidad: parseInt(cant),
+                fechaVencimiento: venc,
+                producto: { id: parseInt(id) }
             };
 
-            try {
-                const response = await fetch(`${API_URL}/con-lote`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(nuevo)
-                });
+            const resp = await fetch(API_LOTES, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loteData)
+            });
 
-                if (response.ok) {
-                    alert("¡Producto y Lote guardados correctamente!");
-                    limpiarForm();
-                    cargarInventario();
-                } else {
-                    const errorMsg = await response.text();
-                    alert("Error al guardar: " + errorMsg);
-                }
-            } catch (error) {
-                console.error("Error en la petición:", error);
-                alert("No se pudo conectar con el servidor.");
+            if (resp.ok) {
+                alert("✅ Stock repuesto con éxito");
+                limpiarRepo();
+                cargarInventario();
+            } else {
+                alert("❌ Error al reponer. Verifica el ID.");
             }
         }
 
-        async function gestionarPromo(id) {
-            const pct = prompt("Porcentaje de descuento:");
-            if (pct && !isNaN(pct)) {
-                try {
-                    const res = await fetch(`${API_URL}/${id}/descuento`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ porcentaje: parseFloat(pct) })
-                    });
-                    if (res.ok) {
-                        alert(`¡Descuento aplicado!`);
-                        cargarInventario();
-                    }
-                } catch (error) {
-                    console.error("Error al aplicar descuento:", error);
-                }
+        // 3. FUNCIÓN PARA PRODUCTO COMPLETAMENTE NUEVO
+        async function agregarProductoNuevo() {
+            const nombre = document.getElementById('nombre').value;
+            const precio = document.getElementById('precio').value;
+            const cant = document.getElementById('nuevo-lote-cant').value;
+
+            if (!nombre || !precio || !cant) return alert("Nombre, Precio y Cantidad son obligatorios");
+
+            const data = {
+                nombre: nombre,
+                categoria: document.getElementById('categoria').value,
+                descripcion: document.getElementById('descripcion').value,
+                precio: parseFloat(precio),
+                numeroLote: document.getElementById('nuevo-lote-nro').value,
+                fechaVencimiento: document.getElementById('nuevo-lote-venc').value,
+                cantidad: parseInt(cant)
+            };
+
+            const resp = await fetch(`${API_URL}/con-lote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (resp.ok) {
+                alert("✨ Producto creado con éxito");
+                location.reload();
             }
         }
 
-        function limpiarForm() {
-            document.querySelectorAll('input').forEach(i => i.value = '');
-            document.getElementById('categoria').selectedIndex = 0;
+        function prepararReposicion(id) {
+            document.getElementById('repo-id').value = id;
+            window.scrollTo(0, 0);
+            document.getElementById('repo-cantidad').focus();
+        }
+
+        function limpiarRepo() {
+            document.getElementById('repo-id').value = '';
+            document.getElementById('repo-cantidad').value = '';
+            document.getElementById('repo-vencimiento').value = '';
+            document.getElementById('repo-lote').value = '';
         }
 
         async function borrar(id) {
-            if (confirm('¿Seguro desea eliminar este producto?')) {
-                try {
-                    const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                    if (res.ok) {
-                        cargarInventario();
-                    }
-                } catch (error) {
-                    console.error("Error al borrar:", error);
-                }
+            if (confirm('¿Eliminar producto?')) {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                cargarInventario();
             }
         }
 
-        // Carga inicial al abrir la página
         cargarInventario();
     </script>
 </body>

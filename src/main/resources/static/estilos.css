@@ -1,22 +1,20 @@
 /* VARIABLES VITALTACC */
 :root {
     --celeste: #00adef;
-    --celeste-vital: #00adef;
     --naranja: #f7941e;
     --blanco: #ffffff;
     --gris: #f8f9fa;
     --azul-ml: #3483fa;
-    --verde-ml: #00a650;
+    --rojo-vital: #d7191c;
 }
 
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
     background-color: var(--gris);
-    overflow-x: hidden;
 }
 
-/* HEADER GLOBAL */
+/* HEADER Y COMPONENTES */
 header {
     background: var(--blanco);
     padding: 10px 5%;
@@ -49,6 +47,12 @@ header {
     padding: 8px 15px;
     border-radius: 50px;
     border: 1px solid #ddd;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.carrito-container:hover {
+    background: #f0f0f0;
 }
 
 .badge-carrito {
@@ -57,342 +61,329 @@ header {
     padding: 2px 10px;
     border-radius: 50%;
     font-weight: bold;
+    font-size: 14px;
 }
 
-/* CONTENEDORES */
-.container,
-.admin-container {
+/* BOTÓN REGISTRO DERECHA */
+.btn-flotante-registro {
+    position: fixed;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    background: var(--naranja);
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2000;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+}
+
+.btn-flotante-registro:hover {
+    right: -30px;
+}
+
+/* --- MODAL DE BIENVENIDA (ESPECÍFICO) --- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 5000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.modal-bienvenida-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.bienvenida-actions {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.omitir-link {
+    color: #888;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* --- PRODUCTOS Y GRID --- */
+.container {
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 30px auto;
     padding: 0 20px;
 }
 
-/* --- VISTA TIENDA (PRODUCTOS) --- */
 .productos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
 }
 
 .card {
     background: white;
-    padding: 20px;
-    border-radius: 15px;
+    padding: 25px;
+    border-radius: 20px;
     text-align: center;
     border: 1px solid #eee;
     transition: 0.3s;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     height: 100%;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-.card h3 {
-    font-size: 1.2rem;
-    margin: 10px 0;
-    min-height: 2.4em;
-}
-
-.card p {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 15px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    height: 40px;
-}
-
-.price {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--celeste);
-    margin-top: auto;
-    margin-bottom: 10px;
-}
-
-.btn-comprar {
-    background: var(--naranja);
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    width: 100%;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.sin-stock {
-    filter: grayscale(1);
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-/* --- VISTA ADMIN (GESTIÓN) --- */
-.admin-panel {
-    background: white;
-    padding: 25px;
+.img-container-card {
+    font-size: 4rem;
+    background: #fdfdfd;
+    padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-}
-
-.tabla-gestion {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
+/* --- CONTROLES DE CANTIDAD (+/-) --- */
+.cantidad-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin: 15px auto;
+    width: fit-content;
+    overflow: hidden;
     background: white;
-    border-radius: 12px;
-    overflow: hidden;
 }
 
-.tabla-gestion th,
-.tabla-gestion td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-.tabla-gestion th {
-    background-color: var(--celeste);
-    color: white;
-    font-size: 12px;
-    text-transform: uppercase;
-}
-
-.tabla-gestion th:nth-child(1) {
-    width: 22%;
-}
-
-.tabla-gestion th:nth-child(2) {
-    width: 12%;
-}
-
-.tabla-gestion th:nth-child(3) {
-    width: 10%;
-}
-
-.tabla-gestion th:nth-child(4) {
-    width: 12%;
-}
-
-.tabla-gestion th:nth-child(5) {
-    width: 10%;
-}
-
-.tabla-gestion th:nth-child(6) {
-    width: 10%;
-}
-
-.tabla-gestion th:nth-child(7) {
-    width: 10%;
-}
-
-.tabla-gestion th:nth-child(8) {
-    width: 110px;
-}
-
-.col-descripcion {
-    max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    font-size: 0.8rem;
-    color: #777;
-}
-
-.btn-accion {
-    padding: 6px 10px;
-    border-radius: 6px;
+.btn-cantidad {
+    background: #f1f1f1;
     border: none;
+    padding: 8px 15px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 1.2rem;
+    transition: 0.2s;
 }
 
-.btn-promo {
-    background: #ff9f43;
-    color: white;
+.btn-cantidad:hover {
+    background: #e0e0e0;
 }
 
-.btn-edit {
-    background: #f4f4f4;
-    color: #333;
-}
-
-.btn-borrar {
-    background: #fff;
-    color: #ff4d4d;
-    border: 1px solid #ff4d4d;
-}
-
-.acciones-celda {
-    white-space: nowrap;
-    text-align: right;
-}
-
-/* Alertas de Stock y Vencimiento */
-.fila-critica {
-    background-color: #fff5f5 !important;
-}
-
-.texto-alerta {
-    color: #e74c3c;
+.cantidad-control input {
+    width: 45px;
+    text-align: center;
+    border: none;
     font-weight: bold;
+    font-size: 1rem;
 }
 
-.badge-stock {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.stock-bajo {
-    background: #fff3e0;
-    color: #ef6c00;
-}
-
-.stock-ok {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-/* --- MODAL ESTILO MERCADO LIBRE --- */
+/* --- SISTEMA DE MODALES ML (CARRITO Y REGISTRO) --- */
 .modal-ml {
     display: none;
     position: fixed;
-    z-index: 9999;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(2px);
-    justify-content: flex-end;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 4000;
+    backdrop-filter: blur(3px);
 }
 
-.modal-content-ml {
+#modalCarrito.modal-ml {
+    justify-content: flex-end;
+    align-items: stretch;
+}
+
+#modalCarrito .modal-content-ml {
     background: white;
     width: 100%;
-    max-width: 380px;
+    max-width: 400px;
     height: 100vh;
-    box-sizing: border-box;
-    padding: 40px 25px;
     display: flex;
     flex-direction: column;
-    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
-    animation: aparecerDerecha 0.3s ease-out;
 }
 
-@keyframes aparecerDerecha {
-    from {
-        transform: translateX(100%);
-    }
+#modalRegistro.modal-ml,
+#modalConfirmacion.modal-ml {
+    justify-content: center;
+    align-items: center;
+}
 
-    to {
-        transform: translateX(0);
-    }
+#modalRegistro .modal-content-ml,
+#modalConfirmacion .modal-content-ml {
+    background: white;
+    width: 90%;
+    max-width: 450px;
+    padding: 30px;
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.carrito-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.item-carrito-lista {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.carrito-footer {
+    padding: 25px;
+    border-top: 2px solid #eee;
+    background: #fff;
+}
+
+.subtotal-container {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.precio-final {
+    color: var(--rojo-vital);
+}
+
+/* BOTONES GLOBALES */
+.btn-comprar-vital {
+    width: 100%;
+    padding: 15px;
+    background: var(--rojo-vital);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.btn-comprar-vital:hover {
+    background: #b31417;
 }
 
 .btn-azul-relleno {
     background: var(--azul-ml);
     color: white;
+    padding: 16px;
     border: none;
-    padding: 15px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.btn-azul-suave {
-    background: rgba(65, 137, 230, 0.15);
-    color: var(--azul-ml);
-    border: none;
-    padding: 15px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.close-modal {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 25px;
-    cursor: pointer;
-    color: #999;
-}
-
-/* --- ESTILOS DEL LOGIN --- */
-.login-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: var(--gris);
-}
-
-.login-card {
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 350px;
-    text-align: center;
-}
-
-.login-card h3 {
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.login-card input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-sizing: border-box;
-    outline: none;
-}
-
-.login-card input:focus {
-    border-color: var(--celeste);
-}
-
-.btn-login {
-    background-color: var(--naranja);
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: bold;
     cursor: pointer;
     transition: 0.3s;
 }
 
-.btn-login:hover {
-    background-color: #e68a1b;
+.btn-azul-relleno:hover {
+    background: #2973df;
 }
 
-.error-msg {
-    color: #ff4d4d;
-    font-size: 14px;
-    display: none;
-    margin-top: 10px;
+.btn-azul-suave {
+    background: rgba(52, 131, 250, 0.1);
+    color: var(--azul-ml);
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-azul-suave:hover {
+    background: rgba(52, 131, 250, 0.2);
+}
+
+.close-modal,
+.close-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #bbb;
+    transition: 0.3s;
+}
+
+.close-modal:hover,
+.close-modal-btn:hover {
+    color: #333;
+}
+
+/* FORMULARIOS */
+.form-group-vital {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.form-group-vital label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #444;
+}
+
+.form-group-vital input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+.form-group-vital input:focus {
+    border-color: var(--azul-ml);
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 131, 250, 0.3);
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    cursor: pointer;
+    color: #888;
 }
